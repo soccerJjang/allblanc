@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.prd.mapper.AdmBoardCommonMapper">
+
+	<select id="boardCommonTotalCnt" parameterType="admBulletinBoardVO" resultType="int">
+		SELECT 
+			IFNULL(count(BC.BOARD_COMMON_SEQ), 0) AS totalCnt
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'boardSj' ">
+						AND BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'boardCn' ">
+						AND BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+
+	<select id="boardCommonList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PRODUCT_CNT AS productCnt
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'boardSj' ">
+						AND BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'boardCn' ">
+						AND BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage} 
+	</select>
+
+	<select id="boardCommonDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PRODUCT_CNT AS productCnt
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_COMMON_SEQ = #{boardCommonSeq}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+	
+	<insert id="boardCommonRegistration" useGeneratedKeys="true" parameterType="admBulletinBoardVO">
+		INSERT INTO BOARD_COMMON
+		(
+			BOARD_COMMON_SEQ
+			, BOARD_SEQ
+			, BOARD_SJ
+			, BOARD_CN
+			, SORT_ORDR
+			, USE_AT
+			, CREATE_DT
+			, PRODUCT_CODE
+			, PRODUCT_CODE_AUTO_AT
+			, CATEGORY1_SEQ
+			, CATEGORY2_SEQ
+			, CATEGORY3_SEQ
+			, PRICE
+			, PRODUCT_CNT
+			, PLAN_NEW_AT
+			, PLAN_BEST_AT
+			, PLAN_RECOMMEND_AT
+			, PLAN_DISCOUNT_AT
+			, DISCOUNT_RATE
+		)
+		VALUES
+		(
+			(SELECT seqNextval('BOARD_COMMON') FROM DUAL)
+			, #{boardSeq}
+			, #{boardSj}
+			, #{boardCn}
+			, (SELECT IFNULL(MAX(SORT_ORDR), 0)+1 FROM BOARD_COMMON AS BC)
+			, #{useAt}
+			, SYSDATE()
+			, #{productCode}
+			, #{productCodeAutoAt}
+			, #{category1Seq}
+			, #{category2Seq}
+			, #{category3Seq}
+			, #{price}
+			, #{productCnt}
+			, #{planNewAt}
+			, #{planBestAt}
+			, #{planRecommendAt}
+			, #{planDiscountAt}
+			, #{discountRate}
+		)
+		<selectKey keyProperty="boardCommonSeq" resultType="int" order="AFTER">
+			SELECT CURRVAL AS boardCommonSeq FROM UID_SEQ WHERE TABLE_NAME = 'BOARD_COMMON'
+		</selectKey>
+	</insert>
+	
+	<update id="boardCommonModification" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_COMMON
+		SET
+			BOARD_SJ = #{boardSj}
+			, BOARD_CN = #{boardCn}
+			, USE_AT = #{useAt}
+			, CATEGORY1_SEQ = #{category1Seq}
+			, CATEGORY2_SEQ = #{category2Seq}
+			, CATEGORY3_SEQ = #{category3Seq}
+			, PRICE = #{price}
+			, PRODUCT_CNT = #{productCnt}
+			, PLAN_NEW_AT = #{planNewAt}
+			, PLAN_BEST_AT = #{planBestAt}
+			, PLAN_RECOMMEND_AT = #{planRecommendAt}
+			, PLAN_DISCOUNT_AT = #{planDiscountAt}
+			, DISCOUNT_RATE = #{discountRate}
+		WHERE BOARD_COMMON_SEQ = #{boardCommonSeq}
+	</update>
+	
+	<delete id="boardCommonDeletion" parameterType="admBulletinBoardVO">
+		DELETE FROM BOARD_COMMON
+		WHERE BOARD_COMMON_SEQ = #{boardCommonSeq}
+	</delete>
+	
+	<update id="boardCommonOrdrUpdate" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_COMMON
+		SET
+			SORT_ORDR = #{sortOrdr}
+		WHERE BOARD_COMMON_SEQ = #{boardCommonSeq}
+	</update>
+	
+	<select id="boardCommonPreDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_COMMON_SEQ <![CDATA[ <> ]]> #{boardCommonSeq}
+			AND BC.SORT_ORDR <![CDATA[ > ]]> #{sortOrdr}
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+		LIMIT 1
+	</select>
+	
+	<select id="boardCommonNextDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_COMMON_SEQ <![CDATA[ <> ]]> #{boardCommonSeq}
+			AND BC.SORT_ORDR <![CDATA[ < ]]> #{sortOrdr}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+		LIMIT 1
+	</select>
+</mapper>

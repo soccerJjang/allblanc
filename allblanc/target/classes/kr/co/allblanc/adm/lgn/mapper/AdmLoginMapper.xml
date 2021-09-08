@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.lgn.mapper.AdmLoginMapper">
+	<select id="loadUserByUsername" parameterType="String" resultType="admUserDetails">
+		SELECT 
+			ADMIN_ID AS adminId
+			, ADMIN_NM AS adminNm
+			, ADMIN_PSWD AS adminPswd
+			, 'ROLE_ADMIN' AS authority
+		FROM ADMIN_INFO
+		WHERE ADMIN_ID = #{adminId}
+	</select>
+	
+	<select id="selectAdmInfo" parameterType="admUserDetails" resultType="admUserDetails">
+		SELECT 
+			ADMIN_ID AS adminId
+			, ADMIN_NM AS adminNm
+			, ADMIN_PSWD AS adminPswd
+			, 'ROLE_ADMIN' AS authority
+		FROM ADMIN_INFO
+		WHERE ADMIN_ID = #{adminId}
+	</select>
+	
+	<update id="updateAdmLoginDt" parameterType="String">
+		UPDATE ADMIN_INFO
+		SET LOGIN_DT = SYSDATE()
+		WHERE ADMIN_ID = #{adminId}
+	</update>
+</mapper>

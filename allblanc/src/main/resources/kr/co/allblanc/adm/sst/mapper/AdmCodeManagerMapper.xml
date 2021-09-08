@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.sst.mapper.AdmCodeManagerMapper">
+
+	<select id="selectCodeManagerMaxSortOrdr" parameterType="admCodeVO" resultType="long">
+		SELECT
+			NVL(MAX(SORT_ORDR)  + 1, 1) AS cnt
+		FROM COMMON_CODE M
+		WHERE 1 = 1
+		<choose>
+			<when test="parentsCodeSeq != null and parentsCodeSeq > 0 ">
+				AND PARENTS_CODE_SEQ = #{parentsCodeSeq}
+			</when>
+			<otherwise>
+				AND PARENTS_CODE_SEQ = 0
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectCodeManagerOneDepthList" parameterType="admCodeVO" resultType="admCodeVO">
+		SELECT
+			C.CODE_SEQ AS codeSeq
+			, C.PARENTS_CODE_SEQ AS parentsCodeSeq
+			, C.CODE AS code
+			, C.CODE_NM AS codeNm
+			, C.CODE_DC AS codeDc
+			, C.USE_AT AS useAt
+			, C.SORT_ORDR AS sortOrdr
+		FROM COMMON_CODE C
+		WHERE 1 = 1
+			AND PARENTS_CODE_SEQ = 0
+		ORDER BY SORT_ORDR
+	</select>
+	
+	<select id="selectCodeManagerAllDepthList" parameterType="admCodeVO" resultType="admCodeVO">
+		<![CDATA[ 
+		SELECT
+			C.CODE_SEQ AS codeSeq
+			, C.PARENTS_CODE_SEQ AS parentsCodeSeq
+			, C.CODE AS code
+			, C.CODE_NM AS codeNm
+			, C.CODE_DC AS codeDc
+			, C.USE_AT AS useAt
+			, C.SORT_ORDR AS sortOrdr
+			, fnc.depth AS depth
+		FROM (
+			SELECT getCommonCodeLevel() AS seq, @level AS depth
+			FROM (
+				SELECT @start_with:=0, @seq:=@start_with, @level:=0
+			) vars
+			JOIN COMMON_CODE
+			WHERE @seq IS NOT NULL
+		) fnc
+		JOIN COMMON_CODE C ON fnc.seq = C.PARENTS_CODE_SEQ
+		ORDER BY depth, SORT_ORDR
+		]]>
+	</select>
+	
+	<select id="selectCodeManagerDetail" parameterType="admCodeVO" resultType="admCodeVO">
+		SELECT
+			C.CODE_SEQ AS codeSeq
+			, C.PARENTS_CODE_SEQ AS parentsCodeSeq
+			, C.CODE AS code
+			, C.CODE_NM AS codeNm
+			, C.CODE_DC AS codeDc
+			, C.USE_AT AS useAt
+			, C.SORT_ORDR AS sortOrdr
+		FROM COMMON_CODE C
+		WHERE 1 = 1
+			AND CODE_SEQ = #{codeSeq}
+	</select>
+	
+	<select id="selectCodeManagerChildList" parameterType="admCodeVO" resultType="admCodeVO">
+		SELECT
+			C.CODE_SEQ AS codeSeq
+			, C.PARENTS_CODE_SEQ AS parentsCodeSeq
+			, C.CODE AS code
+			, C.CODE_NM AS codeNm
+			, C.CODE_DC AS codeDc
+			, C.USE_AT AS useAt
+			, C.SORT_ORDR AS sortOrdr
+		FROM COMMON_CODE C
+		WHERE 1 = 1
+			AND PARENTS_CODE_SEQ = #{codeSeq}
+		ORDER BY SORT_ORDR
+	</select>
+	
+	<insert id="codeManagerRegistration" parameterType="admCodeVO">
+		INSERT INTO COMMON_CODE
+		(
+			CODE_SEQ
+			, PARENTS_CODE_SEQ
+			, CODE
+			, CODE_NM
+			, CODE_DC
+			, USE_AT
+			, CREATE_DT
+			, CREATE_SEQ
+			, SORT_ORDR
+		)
+		VALUES
+		(
+			(SELECT seqNextval('CODE') FROM DUAL)
+			<choose>
+				<when test="parentsCodeSeq != null and parentsCodeSeq > 0 ">
+				, #{parentsCodeSeq}
+				</when>
+				<otherwise>
+				, 0
+				</otherwise>
+			</choose>
+			, #{code}
+			, #{codeNm}
+			, #{codeDc}
+			, #{useAt}
+			, SYSDATE()
+			, #{createSeq}
+			, (SELECT IFNULL(MAX(SORT_ORDR), 0)+1 FROM COMMON_CODE AS C
+				WHERE
+				<choose>
+					<when test="parentsCodeSeq != null and parentsCodeSeq > 0 ">
+						PARENTS_CODE_SEQ = #{parentsCodeSeq}
+					</when>
+					<otherwise>
+						PARENTS_CODE_SEQ = 0
+					</otherwise>
+				</choose>
+			)
+		)
+	</insert>
+	
+	<update id="codeManagerModification" parameterType="admCodeVO">
+		UPDATE COMMON_CODE
+		SET
+			CODE = #{code}
+			, CODE_NM = #{codeNm}
+			, CODE_DC = #{codeDc}
+			<choose>
+				<when test="parentsCodeSeq != null and parentsCodeSeq > 0 ">
+				, PARENTS_CODE_SEQ = #{parentsCodeSeq}
+				</when>
+				<otherwise>
+				, PARENTS_CODE_SEQ = 0
+				</otherwise>
+			</choose>
+			, USE_AT = #{useAt}
+			, SORT_ORDR = #{sortOrdr}
+		WHERE 
+			CODE_SEQ = #{codeSeq}
+	</update>
+	
+	<delete id="codeManagerDeletion" parameterType="admCodeVO">
+		DELETE FROM COMMON_CODE
+		WHERE CODE_SEQ = #{codeSeq}
+	</delete>
+	
+	<update id="codeManagerOrdrUpdate" parameterType="admCodeVO">
+		UPDATE COMMON_CODE
+		SET
+			SORT_ORDR = #{sortOrdr}
+		WHERE CODE_SEQ = #{codeSeq}
+	</update>
+	
+	<select id="codeManagerPreDetail" parameterType="admCodeVO" resultType="admCodeVO">
+		SELECT 
+			C.CODE_SEQ AS codeSeq
+			, C.SORT_ORDR AS sortOrdr
+		FROM COMMON_CODE C
+		WHERE C.CODE_SEQ <![CDATA[ <> ]]> #{codeSeq}
+			AND C.USE_AT = 'Y'
+			AND C.SORT_ORDR <![CDATA[ > ]]> #{sortOrdr}
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+		LIMIT 1
+	</select>
+	
+	<select id="codeManagerNextDetail" parameterType="admCodeVO" resultType="admCodeVO">
+		SELECT 
+			C.CODE_SEQ AS codeSeq
+			, C.SORT_ORDR AS sortOrdr
+		FROM COMMON_CODE C
+		WHERE C.CODE_SEQ <![CDATA[ <> ]]> #{codeSeq}
+			AND C.USE_AT = 'Y'
+			AND C.SORT_ORDR <![CDATA[ < ]]> #{sortOrdr}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+		LIMIT 1
+	</select>
+</mapper>

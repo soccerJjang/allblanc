@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.common.mapper.CommonMenuMapper">
+	
+	<select id="selectAdmGnbMenuList" parameterType="commonMenuVO" resultType="commonMenuVO">
+		<![CDATA[	
+		SELECT
+			M.MENU_SEQ AS menuSeq
+			,M.PARENTS_MENU_SEQ AS parentsMenuSeq
+			, M.MENU_NM AS menuNm
+			, M.MENU_URL AS menuUrl
+			, M.USE_AT AS useAt
+			, M.SORT_ORDR AS sortOrdr
+			, fnc.menuDepth AS menuDepth
+		FROM (
+			SELECT getMenuLevel() AS seq, @level AS menuDepth
+			FROM (
+				SELECT @start_with:=0, @seq:=@start_with, @level:=0
+			) vars
+			JOIN MENU_INFO
+			WHERE @seq IS NOT NULL
+		) fnc
+		JOIN MENU_INFO M ON fnc.seq = M.MENU_SEQ
+		]]>
+	</select>
+	
+	<select id="selectAdmRootMenuSeq" parameterType="commonMenuVO" resultType="commonMenuVO">
+		<![CDATA[	
+		SELECT 
+			menuSeq, parentsMenuSeq AS rootMenuSeq
+		FROM (
+			SELECT T.*
+			FROM ( 
+				SELECT
+					M.MENU_SEQ AS menuSeq
+					,M.PARENTS_MENU_SEQ AS parentsMenuSeq
+					, M.MENU_NM AS menuNm
+					, M.MENU_URL AS menuUrl
+					, M.USE_AT AS useAt
+					, M.SORT_ORDR AS sortOrdr
+					, fnc.menuDepth AS menuDepth
+					, ROW_NUMBER() OVER() AS ROWNUM
+				FROM (
+					SELECT getMenuLevel() AS seq, @level AS menuDepth
+					FROM (
+						SELECT @start_with:=0, @seq:=@start_with, @level:=0
+					) vars
+					JOIN MENU_INFO
+					WHERE @seq IS NOT NULL
+						AND	(
+							MENU_URL = #{menuUrl}
+							OR 
+							MENU_SEQ IN (SELECT MENU_SEQ FROM MENU_DETAIL WHERE MENU_DETAIL_URL = #{menuUrl})
+						)
+				) fnc
+				JOIN MENU_INFO M ON fnc.seq = M.MENU_SEQ
+			) T
+			ORDER BY menuDepth DESC
+		) T
+		WHERE ROWNUM = 1
+		]]>
+	</select>
+
+	<select id="selectAdmLnbMenuList" parameterType="commonMenuVO" resultType="commonMenuVO">
+		<![CDATA[	
+		SELECT
+			M.MENU_SEQ AS menuSeq
+			,M.PARENTS_MENU_SEQ AS parentsMenuSeq
+			, M.MENU_NM AS menuNm
+			, M.MENU_URL AS menuUrl
+			, M.USE_AT AS useAt
+			, M.SORT_ORDR AS sortOrdr
+			, fnc.menuDepth AS menuDepth
+			, (SELECT count(1) FROM MENU_INFO WHERE PARENTS_MENU_SEQ = M.MENU_SEQ) AS childMenuCnt
+		FROM (
+			SELECT getMenuLevel() AS seq, @level AS menuDepth
+			FROM (
+				SELECT @start_with:=0, @seq:=@start_with, @level:=0
+			) vars
+			JOIN MENU_INFO
+			WHERE @seq IS NOT NULL
+				AND (
+					MENU_SEQ = #{rootMenuSeq}
+					OR PARENTS_MENU_SEQ = #{rootMenuSeq}
+				)
+		) fnc
+		JOIN MENU_INFO M ON fnc.seq = M.MENU_SEQ 
+		]]>
+	</select>
+</mapper>

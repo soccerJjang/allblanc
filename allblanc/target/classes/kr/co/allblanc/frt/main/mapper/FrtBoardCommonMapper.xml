@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.frt.main.mapper.FrtBoardCommonMapper">
+
+	<select id="frtBoardCommonTotalCnt" parameterType="admBulletinBoardVO" resultType="int">
+		SELECT 
+			IFNULL(count(BC.BOARD_COMMON_SEQ), 0) AS totalCnt
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			AND USE_AT = '1'
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+
+	<select id="frtBoardCommonList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PRODUCT_CNT AS productCnt
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			AND USE_AT = '1'
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+
+	<select id="frtBoardCommonDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PRODUCT_CNT AS productCnt
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_COMMON_SEQ = #{boardCommonSeq}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+	
+	<update id="frtBoardCommonOrder" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_COMMON
+		SET
+			SALE_CNT = SALE_CNT - 1
+		WHERE BOARD_COMMON_SEQ = #{boardCommonSeq}
+	</update>
+</mapper>

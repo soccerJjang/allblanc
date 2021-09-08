@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.sls.mapper.AdmSalesManagerMapper">
+
+	<select id="salesManagerTotalCnt" parameterType="admBulletinBoardVO" resultType="int">
+		SELECT 
+			IFNULL(count(BC.BOARD_COMMON_SEQ), 0) AS totalCnt
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'boardSj' ">
+						AND BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'boardCn' ">
+						AND BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+
+	<select id="salesManagerList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS salesManagerSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			<if test="searchKey != null and searchKey != '' ">
+				<choose>
+					<when test="searchKey == 'boardSj' ">
+						AND BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'boardCn' ">
+						AND BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage} 
+	</select>
+
+	<select id="salesManagerDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS salesManagerSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_COMMON_SEQ = #{salesManagerSeq}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+	
+	<select id="salesStatustucsTotalCnt" parameterType="admBulletinBoardVO" resultType="int">
+		SELECT 
+			IFNULL(count(BC.BOARD_COMMON_SEQ), 0) AS totalCnt
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'boardSj' ">
+						AND BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'boardCn' ">
+						AND BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+
+	<select id="salesStatustucsList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS salesManagerSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			<if test="searchKey != null and searchKey != '' ">
+				<choose>
+					<when test="searchKey == 'boardSj' ">
+						AND BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'boardCn' ">
+						AND BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BC.BOARD_SJ LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BC.BOARD_CN LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage} 
+	</select>
+
+	<select id="salesStatustucsDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_COMMON_SEQ AS salesManagerSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+			, BC.PRODUCT_CODE AS productCode
+			, BC.PRODUCT_CODE_AUTO_AT AS productCodeAutoAt
+			, BC.CATEGORY1_SEQ AS category1Seq
+			, BC.CATEGORY2_SEQ AS category2Seq
+			, BC.CATEGORY3_SEQ AS category3Seq
+			, BC.PRICE AS price
+			, BC.PLAN_NEW_AT AS planNewAt
+			, BC.PLAN_BEST_AT AS planBestAt
+			, BC.PLAN_RECOMMEND_AT AS planRecommendAt
+			, BC.PLAN_DISCOUNT_AT AS planDiscountAt
+			, BC.DISCOUNT_RATE AS discountRate
+			, BC.SALE_CNT AS saleCnt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_COMMON_SEQ = BC.BOARD_COMMON_SEQ) AS originalFileNm
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_COMMON_SEQ = #{salesManagerSeq}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+	</select>
+</mapper>

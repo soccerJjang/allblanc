@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+		
+	<beans:import resource="appServlet/servlet-context.xml" />
+	
+	<http pattern="/" security="none" />
+	<http pattern="/frt/**" security="none" />
+	<http pattern="/favicon.ico" security="none" />
+	<http pattern="/resource/**" security="none" />
+	<http pattern="/400" security="none" />
+	<http pattern="/404" security="none" />
+	<http pattern="/500" security="none" />
+	
+	<!-- admin security -->
+	<http 
+		pattern="/adm/**" 
+		auto-config="true" 
+		use-expressions="true" >
+		<headers>
+			<hsts disabled="true"/>
+		</headers>
+		<csrf disabled="true" />
+		<intercept-url pattern="/adm/lgn/login.do" access="permitAll" />
+		<intercept-url pattern="/adm/lgn/loginProcess.do" access="permitAll" />
+		<intercept-url pattern="/adm/**" access="hasAnyRole('ROLE_ADMIN')" />
+		<access-denied-handler error-page="/common/error.do" />
+		<form-login login-page="/adm/lgn/login.do"
+			authentication-success-handler-ref="loginSuccessHandler"
+			authentication-failure-handler-ref="loginFailureHandler"
+			username-parameter="adminId"
+			password-parameter="adminPswd" 
+			default-target-url="/adm/stats/dashboard.do"
+			login-processing-url="/adm/lgn/loginProcess.do" />
+		<logout
+			logout-url="/adm/lgn/logout.do"
+			logout-success-url="/adm/lgn/login.do?status=logout"
+			invalidate-session="true"
+			delete-cookies="true" />
+	</http>
+	
+	<!-- <authentication-manager>
+		<authentication-provider>
+			<user-service>
+				<user name="admin" password="admin2021!?" authorities="ROLE_ADMIN"/>
+			</user-service>
+		</authentication-provider>
+	</authentication-manager> -->
+	<authentication-manager>
+		<authentication-provider ref="admAuthProvider" />
+		<!-- <authentication-provider user-service-ref="admUserDetailsService"></authentication-provider> -->
+	</authentication-manager>
+	
+	<beans:bean id="loginSuccessHandler" class="kr.co.allblanc.common.security.AdmLoginSuccessHandler">
+		<beans:property name="defaultTargetUrl" value="/adm/stats/dashboard.do" />
+		<beans:property name="alwaysUseDefaultTargetUrl" value="true" />
+	</beans:bean>
+	<beans:bean id="loginFailureHandler" class="kr.co.allblanc.common.security.AdmLoginFailureHandler">
+		<beans:property name="defaultFailureUrl" value="/adm/lgn/login.do?status=fail" />
+	</beans:bean>
+	<beans:bean id="AdmUserDetailsService" class="kr.co.allblanc.common.security.AdmUserDetailsService" />
+	<beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	<beans:bean id="admAuthProvider" class="kr.co.allblanc.common.security.AdmAuthProvider">
+	</beans:bean>
+
+	
+	<!-- secured method --> 
+	<global-method-security secured-annotations="enabled" />
+       
+</beans:beans>

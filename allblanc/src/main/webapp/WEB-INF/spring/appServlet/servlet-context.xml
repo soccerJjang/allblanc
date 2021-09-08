@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<mvc:annotation-driven />
+	<context:annotation-config />
+	
+	<context:component-scan base-package="kr.co.allblanc" />
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+
+	<bean id="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
+        <property name="order" value="0"/>
+    </bean>
+
+	<bean id="tilesViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView" />
+		<property name="order" value="1" />
+	</bean>
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="2" />
+	</bean>
+  	
+  	<bean id="excelDownloadView" class="kr.co.allblanc.common.util.ExcelDownloadView"/>
+	
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+		<property name="definitions">
+		<list>
+  			<value>/WEB-INF/tiles/tiles.xml</value>
+  		</list>
+  		</property>
+  		<property name="preparerFactoryClass" value="org.springframework.web.servlet.view.tiles3.SimpleSpringPreparerFactory"></property>
+  	</bean>
+  	
+	<!-- config properties -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:/config.properties</value>
+			</list>
+		</property>
+		<property name="fileEncoding" value="UTF-8"/>
+	</bean>
+	
+	<!-- multipartResolver -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="${fileupload.maxUploadSize}" />
+	</bean>
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<context:annotation-config />
+	
+	<!-- mariadb -->
+	<bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="dataSource">
+		<property name="driverClassName" value="org.mariadb.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mariadb://112.220.88.66:9906/allblanc"></property>
+		<property name="username" value="allblanc"></property>
+		<property name="password" value="allblanc2021!?"></property>
+	</bean>
+	
+	<!-- mybatis -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:/mybatis-config.xml" />
+		<property name="typeAliasesPackage" value="kr.co.allblanc" />
+		<property name="mapperLocations" value="classpath*:kr/co/allblanc/**/**/mapper/*Mapper.xml" />
+	</bean>
+	
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate" >
+		<constructor-arg index="0" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<mybatis-spring:scan base-package="kr.co.allblanc" />
+	
+	<!-- 트랜잭션 관리를 위한 bean  -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	      <property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- pagination -->
+	<bean id="adminRenderer" class="kr.co.allblanc.common.util.AdminPaginationRenderer"/>
+	<bean id="imageRenderer" class="kr.co.allblanc.common.util.ImagePaginationRenderer"/>
+	<bean id="textRenderer" class="kr.co.allblanc.common.util.TextPaginationRenderer"/>
+	<bean id="paginationManager" class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="admin" value-ref="adminRenderer"/>
+				<entry key="image" value-ref="imageRenderer"/>
+				<entry key="text" value-ref="textRenderer"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- Integration Apache Commons Validator by Spring Modules -->
+	<bean id="beanValidator" class="org.springmodules.validation.commons.DefaultBeanValidator">
+		<property name="validatorFactory" ref="validatorFactory"/>
+	</bean>
+	
+	<bean id="validatorFactory" class="org.springmodules.validation.commons.DefaultValidatorFactory">
+		<property name="validationConfigLocations">
+			<list>
+				<!-- validator-rules.xml, validator.xml의 위치-->
+				<value>/WEB-INF/conf/validator-rules.xml</value>
+				<value>/WEB-INF/conf/validator.xml</value>
+			</list>
+		</property>
+	</bean>
+	
+</beans>

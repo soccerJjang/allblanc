@@ -1,0 +1,68 @@
+@charset "UTF-8";
+/* 
+공지
+1. 테블릿 분기는 되도록 지원해주지 않고 수정사항 발생시 레이아웃이 많이 벗어날때 분기처리 하여 진행.
+2. 공통으로 사용 가능한 ui는 worldvision.css에 옮겨주고 공유한다. 주 1회 주어진 날짜에 진행.
+3. ch_pc/ ch_m/ ch_t 클래스로 채널분기. 그밖에 공통들은 worldvision.css css 꼭 확인하기
+4. 경우에 따라서 통이미지 작업이 있을시에는 이미지에 속성값 alt="하단 내용 참조로 작성하고 hide 클래스 추가하여 구조적 태그를 이용하여 내용을 충분히 작성해준다.
+5. css 기준 해상도는 모바일이라 모바일은 미디어쿼리를 사용하지않는다. 
+  그밖에 기종들은 미디어쿼리로 진행한다. 추후 소스를 취합할 예정이기때문에 중복 선언이 없도록 더블클래스 사용은 되도록 하지않는다.
+*/
+
+/* layout */
+footer, header {width:100%;}
+footer .inner , header .inner {min-width:320px; max-width:1279px;}
+
+/* 접근성 마크업 */
+.hide {}
+
+/* 정렬 */
+.ag_l {text-align:left !important}
+.ag_c {text-align:center !important}
+.ag_r {text-align:right !important}
+
+/* common */
+.pstn_group {display:table; width:100%}
+.pstn_group > div {display:table-cell; border:1px solid #eee;}
+.pstn_group > div > a {display:block; width:100%}
+
+.list_col_2,.list_col_4 {font-size:0;}
+.list_col_2 li,.list_col_4 li {display:inline-block; font-size:12px}
+.list_col_4 {}
+
+.list_col_4 li {width:calc((100% - 6px)/4); background:orange}
+.list_col_4 li + li {margin-left:2px}
+.list_col_2 {}
+.list_col_2 li {}
+
+/* 멀티라인 말줄임 */
+.multi_line_2 {}
+.multi_line_3 {}
+.multi_line_4 {}
+
+/* 분기 */
+.ch_pc {}
+.ch_m {}
+.ch_t {} 
+
+
+
+
+/* 동영상 */
+.video_default {width:100%; max-width:963px; margin:0 auto}
+.video_medium {width:100%; max-width:767px; margin:0 auto}
+
+/* Tablet 768px 이후 되도록 대응 안하기 */
+@media screen and (min-width:768px) and (max-width:1024){
+footer .inner , header .inner {min-width:1024px; max-width:1279px;}
+}
+
+/* Tablet 1024px 이후 */
+@media screen and (min-width:1024) and (max-width:1279px){
+
+}
+
+/* Pc 1280 이후 */
+@media screen and (min-width:1280px){
+
+}

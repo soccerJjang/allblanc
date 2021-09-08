@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.common.mapper.CommonFileMapper">
+
+	<select id="selectFileList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT
+			BOARD_FILE_SEQ AS boardFileSeq
+			, BOARD_COMMON_SEQ AS boardCommonSeq
+			, BOARD_POPUP_SEQ AS boardPopupSeq
+			, BOARD_THUMBNAIL_SEQ AS boardThumbnailSeq
+			, BOARD_DESIGN_SEQ AS boardDesignSeq
+		FROM BOARD_FILE_INFO
+		WHERE 1 = 1
+			<if test="boardCommonSeq != null and boardCommonSeq > 0 ">
+			AND BOARD_COMMON_SEQ = #{boardCommonSeq}
+			</if>
+			<if test="boardPopupSeq != null and boardPopupSeq > 0 ">
+			AND BOARD_POPUP_SEQ = #{boardPopupSeq}
+			</if>
+			<if test="boardThumbnailSeq != null and boardThumbnailSeq > 0 ">
+			AND BOARD_THUMBNAIL_SEQ = #{boardThumbnailSeq}
+			</if>
+			<if test="boardDesignSeq != null and boardDesignSeq > 0 ">
+			AND BOARD_DESIGN_SEQ = #{boardDesignSeq}
+			</if>
+	</select>
+
+	<insert id="insertFile" parameterType="admBulletinBoardVO">
+		INSERT INTO BOARD_FILE_INFO
+		(
+			BOARD_FILE_SEQ
+			, BOARD_COMMON_SEQ
+			, BOARD_POPUP_SEQ
+			, BOARD_THUMBNAIL_SEQ
+			, BOARD_DESIGN_SEQ
+			, FILE_PATH
+			, NEW_FILE_NM
+			, ORIGNL_FILE_NM
+			, FILE_SIZE
+			, CREATE_DT
+		)
+		VALUES
+		(
+			(SELECT seqNextval('BOARD_FILE') FROM DUAL)
+			, #{boardCommonSeq}
+			, #{boardPopupSeq}
+			, #{boardThumbnailSeq}
+			, #{boardDesignSeq}
+			, #{filePath}
+			, #{newFileNm}
+			, #{originalFileNm}
+			, #{fileSize}
+			, SYSDATE()
+		)
+	</insert>
+	
+	<update id="updateFile" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_FILE_INFO
+		SET
+			BOARD_COMMON_SEQ = #{boardCommonSeq}
+			, BOARD_POPUP_SEQ = #{boardPopupSeq}
+			, BOARD_THUMBNAIL_SEQ = #{boardThumbnailSeq}
+			, BOARD_DESIGN_SEQ = #{boardDesignSeq}
+			, FILE_PATH = #{filePath}
+			, NEW_FILE_NM = #{newFileNm}
+			, ORIGNL_FILE_NM = #{originalFileNm}
+			, FILE_SIZE = #{fileSize}
+		WHERE BOARD_FILE_SEQ = #{boardFileSeq}
+	</update>
+</mapper>

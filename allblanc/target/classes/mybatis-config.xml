@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration> 
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	<typeAliases>
+		<!-- java basic alias -->
+		<typeAlias alias="string" type="java.lang.String" />
+		<typeAlias alias="String" type="java.lang.String" />
+		<typeAlias alias="int" type="java.lang.Integer" />
+		<typeAlias alias="Integer" type="java.lang.Integer" />
+		<typeAlias alias="long" type="java.lang.Long" />
+		<typeAlias alias="map" type="java.util.Map" />
+		<!-- java basic alias -->
+		<!-- common alias -->
+		<typeAlias alias="commonUserVO" type="kr.co.allblanc.common.domain.CommonUserVO" />
+		<!-- common alias -->
+		<!-- admin alias -->
+		<typeAlias alias="admBulletinBoardVO" type="kr.co.allblanc.adm.sst.domain.AdmBulletinBoardVO" />
+		<typeAlias alias="admManagerMenuVO" type="kr.co.allblanc.adm.sst.domain.AdmManagerMenuVO"/>
+		<typeAlias alias="admCodeVO" type="kr.co.allblanc.adm.sst.domain.AdmCodeVO" />
+		<typeAlias alias="AdmProductCategoryVO" type="kr.co.allblanc.adm.prd.domain.AdmProductCategoryVO"/>
+		<!-- admin alias -->
+		<!-- front alias -->
+		<!-- front alias -->
+	</typeAliases> 
+</configuration>

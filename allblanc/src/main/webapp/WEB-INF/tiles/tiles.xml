@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+	<!-- 빈화면 -->
+    <definition name="common/*" template="/WEB-INF/tiles/comlayout/nullLayout.jsp">
+        <put-attribute name="contentBody" value="/WEB-INF/views/common/{1}.jsp" />
+    </definition>
+	
+	<definition name="common/*/*" extends="/WEB-INF/tiles/comlayout/nullLayout.jsp">
+        <put-attribute name="contentBody" value="/WEB-INF/views/common/{1}/{2}.jsp" />
+	</definition>
+	
+	<definition name="common/*/*/*" extends="/WEB-INF/tiles/comlayout/nullLayout.jsp">
+        <put-attribute name="contentBody" value="/WEB-INF/views/common/{1}/{2}/{3}.jsp" />
+	</definition>
+    
+    <!-- 사용자화면 -->
+	<definition name="frtLayout" template="/WEB-INF/tiles/frtLayout/layout.jsp" >
+		<put-attribute name="header" value="/WEB-INF/tiles/frtLayout/header.jsp" />
+		<put-attribute name="contents" value="" />
+	</definition>
+	
+	<definition name="frt/*" extends="frtLayout">
+		<put-attribute name="contents" value="/WEB-INF/views/frt/{1}.jsp" />
+	</definition>
+	
+	<definition name="frt/*/*" extends="frtLayout">
+		<put-attribute name="contents" value="/WEB-INF/views/frt/{1}/{2}.jsp" />
+	</definition>
+	
+	<definition name="frt/*/*/*" extends="frtLayout">
+		<put-attribute name="contents" value="/WEB-INF/views/frt/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+    <!-- 관리자화면 -->
+	<definition name="admLayout" template="/WEB-INF/tiles/admLayout/layout.jsp" preparer="kr.co.allblanc.common.util.MenuPreparer">
+		<put-attribute name="header" value="/WEB-INF/tiles/admLayout/header.jsp" />
+		<put-attribute name="gnb" value="/WEB-INF/tiles/admLayout/gnb.jsp"/>
+		<put-attribute name="lnb" value="/WEB-INF/tiles/admLayout/lnb.jsp" />
+		<put-attribute name="contents" value="" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/admLayout/footer.jsp" />
+	</definition>
+	
+	<definition name="adm/*" extends="admLayout">
+		<put-attribute name="contents" value="/WEB-INF/views/adm/{1}.jsp" />
+	</definition>
+	
+	<definition name="adm/*/*" extends="admLayout">
+		<put-attribute name="contents" value="/WEB-INF/views/adm/{1}/{2}.jsp" />
+	</definition>
+	
+	<definition name="adm/*/*/*" extends="admLayout">
+		<put-attribute name="contents" value="/WEB-INF/views/adm/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+</tiles-definitions>

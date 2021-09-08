@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.sst.mapper.AdmBulletinBoardMapper">
+
+	<select id="boardMasterTotalCnt" parameterType="admBulletinBoardVO" resultType="int">
+		SELECT 
+			count(BM.BOARD_SEQ) AS totalCnt
+		FROM BOARD_MASTER BM
+		WHERE 1 = 1
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+	</select>
+
+	<select id="boardMasterList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BM.BOARD_SEQ AS boardSeq
+			, BM.BOARD_TYPE AS boardType
+			, BM.BOARD_TYPE_NM AS boardTypeNm
+			, BM.CREATE_DT AS createDt
+		FROM BOARD_MASTER BM
+		WHERE 1 = 1
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="boardMasterDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BM.BOARD_SEQ AS boardSeq
+			, BM.BOARD_TYPE AS boardType
+			, BM.BOARD_TYPE_NM AS boardTypeNm
+			, BM.CREATE_DT AS createDt
+		FROM BOARD_MASTER BM
+		WHERE BM.BOARD_SEQ = #{boardSeq}
+		ORDER BY CREATE_DT DESC
+	</select>
+	
+	<insert id="boardMasterRegistration" useGeneratedKeys="true" parameterType="admBulletinBoardVO">
+		INSERT INTO BOARD_MASTER
+		(
+			BOARD_SEQ
+			, BOARD_TYPE
+			, BOARD_TYPE_NM
+			, CREATE_DT
+		)
+		VALUES
+		(
+			(SELECT seqNextval('BOARD_MASTER') FROM DUAL)
+			, #{boardType}
+			, #{boardTypeNm}
+			, SYSDATE()
+		)
+	</insert>
+	
+	<update id="boardMasterModification" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_MASTER
+		SET
+			BOARD_TYPE = #{boardType}
+			, BOARD_TYPE_NM = #{boardTypeNm}
+		WHERE BOARD_SEQ = #{boardSeq}
+	</update>
+	
+	<delete id="boardMasterDeletion" parameterType="admBulletinBoardVO">
+		DELETE FROM BOARD_MASTER
+		WHERE BOARD_SEQ = #{boardSeq}
+	</delete>
+
+	<select id="boardCommonList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_SEQ AS boardSeq
+			, BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT as readCnt
+			, BC.USE_AT as useAt
+			, BC.CREATE_DT AS createDt
+		FROM BOARD_COMMON BC
+		WHERE 1 = 1
+			AND BC.USE_AT = 'Y'
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage} 
+	</select>
+
+	<select id="boardCommonDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BC.BOARD_SEQ AS boardSeq
+			, BC.BOARD_COMMON_SEQ AS boardCommonSeq
+			, BC.BOARD_SJ AS boardSj
+			, BC.BOARD_CN AS boardCn
+			, BC.PARENT_SEQ AS parentSeq
+			, BC.SORT_ORDR AS sortOrdr
+			, BC.READ_CNT AS readCnt
+			, BC.USE_AT AS useAt
+			, BC.CREATE_DT AS createDt
+		FROM BOARD_COMMON BC
+		WHERE BC.BOARD_SEQ = #{boardCommonSeq}
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+	</select>
+	
+	<insert id="boardCommonRegistration" useGeneratedKeys="true" parameterType="admBulletinBoardVO">
+		INSERT INTO BOARD_COMMON
+		(
+			BOARD_COMMON_SEQ
+			, BOARD_SEQ
+			, BOARD_SJ
+			, BOARD_CN
+			, SORT_ORDR
+			, USE_AT
+			, CREATE_DT
+		)
+		VALUES
+		(
+			(SELECT seqNextval('BOARD_COMMON') FROM DUAL)
+			, #{boardSeq}
+			, #{boardSj}
+			, #{boardCn}
+			, #{sortOrdr}
+			, 'Y'
+			, SYSDATE()
+		)
+	</insert>
+	
+	<update id="boardCommonModification" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_COMMON
+		SET
+			BOARD_SJ = #{boardSj}
+			, BOARD_CN = #{boardCn}
+		WHERE BOARD_COMMON_SEQ = #{boardCommonSeq}
+	</update>
+	
+	<delete id="boardCommonDeletion" parameterType="admBulletinBoardVO">
+		DELETE FROM BOARD_COMMON
+		WHERE BOARD_COMMON_SEQ = #{boardCommonSeq}
+	</delete>
+</mapper>

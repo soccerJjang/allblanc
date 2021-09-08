@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.sst.mapper.AdmAdminManagerMapper">
+
+	<select id="adminManagerTotalCnt" parameterType="admAdminVO" resultType="int">
+		SELECT 
+			IFNULL(count(AI.ADMIN_SEQ), 0) AS totalCnt
+		FROM ADMIN_INFO AI
+		WHERE 1 = 1
+			AND AI.USE_AT = 'Y'
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'adminId' ">
+						AND AI.ADMIN_ID LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'adminNm' ">
+						AND AI.ADMIN_NM LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							AI.ADMIN_ID LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							AI.ADMIN_NM LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY CREATE_DT DESC
+	</select>
+
+	<select id="adminManagerList" parameterType="admAdminVO" resultType="admAdminVO">
+		SELECT 
+			AI.ADMIN_SEQ AS adminSeq
+			, AI.ADMIN_ID AS adminId
+			, AI.ADMIN_NM AS adminNm
+			, AI.ADMIN_DIVISION AS adminDivision
+			, AI.USE_AT as useAt
+			, AI.CREATE_DT AS createDt
+			, AI.LOGIN_DT AS loginDt
+		FROM ADMIN_INFO AI
+		WHERE 1 = 1
+			AND AI.USE_AT = 'Y'
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'adminId' ">
+						AND AI.ADMIN_ID LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'adminNm' ">
+						AND AI.ADMIN_NM LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							AI.ADMIN_ID LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							AI.ADMIN_NM LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage} 
+	</select>
+
+	<select id="adminManagerDetail" parameterType="admAdminVO" resultType="admAdminVO">
+		SELECT 
+			AI.ADMIN_SEQ AS adminSeq
+			, AI.ADMIN_ID AS adminId
+			, AI.ADMIN_NM AS adminNm
+			, AI.ADMIN_DIVISION AS adminDivision
+			, AI.USE_AT as useAt
+			, AI.CREATE_DT AS createDt
+			, AI.LOGIN_DT AS loginDt
+		FROM ADMIN_INFO AI
+		WHERE AI.ADMIN_SEQ = #{adminSeq}
+			AND AI.USE_AT = 'Y'
+		ORDER BY CREATE_DT DESC
+	</select>
+	
+	<insert id="adminManagerRegistration" useGeneratedKeys="true" parameterType="admAdminVO">
+		INSERT INTO ADMIN_INFO
+		(
+			ADMIN_SEQ
+			, ADMIN_ID
+			, ADMIN_NM
+			, ADMIN_PSWD
+			, ADMIN_DIVISION
+			, USE_AT
+			, CREATE_DT
+		)
+		VALUES
+		(
+			(SELECT seqNextval('ADMIN_INFO') FROM DUAL)
+			, #{adminId}
+			, #{adminNm}
+			, #{adminPswd}
+			, #{adminDivision}
+			, 'Y'
+			, SYSDATE()
+		)
+		<selectKey keyProperty="adminSeq" resultType="int" order="AFTER">
+			SELECT CURRVAL AS adminSeq FROM UID_SEQ WHERE TABLE_NAME = 'ADMIN_INFO'
+		</selectKey>
+	</insert>
+	
+	<update id="adminManagerModification" parameterType="admAdminVO">
+		UPDATE ADMIN_INFO
+		SET
+			ADMIN_ID = #{adminId}
+			, ADMIN_NM = #{adminNm}
+			, ADMIN_PSWD = #{adminPswd}
+		WHERE ADMIN_SEQ = #{adminSeq}
+	</update>
+	
+	<update id="adminManagerPasswordInit" parameterType="admAdminVO">
+		UPDATE ADMIN_INFO
+		SET
+			ADMIN_PSWD = #{adminPswd}
+		WHERE ADMIN_SEQ = #{adminSeq}
+	</update>
+	
+	<delete id="adminManagerDeletion" parameterType="admAdminVO">
+		DELETE FROM ADMIN_INFO
+		WHERE ADMIN_SEQ = #{adminSeq}
+	</delete>
+</mapper>

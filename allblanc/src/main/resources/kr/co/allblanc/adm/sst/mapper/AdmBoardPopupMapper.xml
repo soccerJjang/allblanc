@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.sst.mapper.AdmBoardPopupMapper">
+
+	<select id="boardPopupTotalCnt" parameterType="admBulletinBoardVO" resultType="int">
+		SELECT 
+			IFNULL(count(BP.BOARD_POPUP_SEQ), 0) AS totalCnt
+		FROM BOARD_POPUP BP
+		WHERE 1 = 1
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'popupNm' ">
+						AND BP.POPUP_NM LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'popupDc' ">
+						AND BP.POPUP_DC LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BP.POPUP_NM LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BP.POPUP_DC LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY CREATE_DT DESC
+	</select>
+
+	<select id="boardPopupList" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BP.BOARD_POPUP_SEQ AS boardPopupSeq
+			, BP.POPUP_NM AS popupNm
+			, BP.POPUP_DC as popupDc
+			, BP.NOTICE_START_DAY as noticeStartDay
+			, BP.NOTICE_END_DAY as noticeEndDay
+			, (DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN BP.NOTICE_START_DAY AND BP.NOTICE_END_DAY) AS noticeAt
+			, BP.POPUP_LOCATION_LEFT as popupLocationLeft
+			, BP.POPUP_LOCATION_RIGHT as popupLocationRight
+			, BP.POPUP_SIZE_WIDTH as popupSizeWidth
+			, BP.POPUP_SIZE_HEIGHT as popupSizeHeight
+			, BP.POPUP_KIND as popupKind
+			, BP.CREATE_DT AS createDt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_POPUP_SEQ = BP.BOARD_POPUP_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_POPUP_SEQ = BP.BOARD_POPUP_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_POPUP_SEQ = BP.BOARD_POPUP_SEQ) AS originalFileNm
+		FROM BOARD_POPUP BP
+		WHERE 1 = 1
+			<if test="searchValue != null and searchValue != '' ">
+				<choose>
+					<when test="searchKey == 'popupNm' ">
+						AND BP.POPUP_NM LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<when test="searchKey == 'popupDc' ">
+						AND BP.POPUP_DC LIKE CONCAT('%',#{searchValue},'%') 
+					</when>
+					<otherwise>
+						AND (
+							BP.POPUP_NM LIKE CONCAT('%',#{searchValue},'%')
+							OR
+							BP.POPUP_DC LIKE CONCAT('%',#{searchValue},'%')
+						) 
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY CREATE_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage} 
+	</select>
+
+	<select id="boardPopupDetail" parameterType="admBulletinBoardVO" resultType="admBulletinBoardVO">
+		SELECT 
+			BP.BOARD_POPUP_SEQ AS boardPopupSeq
+			, BP.POPUP_NM AS popupNm
+			, BP.POPUP_DC as popupDc
+			, BP.NOTICE_START_DAY as noticeStartDay
+			, BP.NOTICE_END_DAY as noticeEndDay
+			, BP.POPUP_LOCATION_LEFT as popupLocationLeft
+			, BP.POPUP_LOCATION_RIGHT as popupLocationRight
+			, BP.POPUP_SIZE_WIDTH as popupSizeWidth
+			, BP.POPUP_SIZE_HEIGHT as popupSizeHeight
+			, BP.POPUP_KIND as popupKind
+			, BP.CREATE_DT AS createDt
+			, (SELECT FILE_PATH FROM BOARD_FILE_INFO WHERE BOARD_POPUP_SEQ = BP.BOARD_POPUP_SEQ) AS filePath
+			, (SELECT NEW_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_POPUP_SEQ = BP.BOARD_POPUP_SEQ) AS newFileNm
+			, (SELECT ORIGNL_FILE_NM FROM BOARD_FILE_INFO WHERE BOARD_POPUP_SEQ = BP.BOARD_POPUP_SEQ) AS originalFileNm
+		FROM BOARD_POPUP BP
+		WHERE BP.BOARD_POPUP_SEQ = #{boardPopupSeq}
+		ORDER BY CREATE_DT DESC
+	</select>
+	
+	<insert id="boardPopupRegistration" useGeneratedKeys="true" parameterType="admBulletinBoardVO">
+		INSERT INTO BOARD_POPUP
+		(
+			BOARD_POPUP_SEQ
+			, BOARD_SEQ
+			, POPUP_NM
+			, POPUP_DC
+			, NOTICE_START_DAY
+			, NOTICE_END_DAY
+			, POPUP_LOCATION_LEFT
+			, POPUP_LOCATION_RIGHT
+			, POPUP_SIZE_WIDTH
+			, POPUP_SIZE_HEIGHT
+			, POPUP_KIND
+			, CREATE_DT
+		)
+		VALUES
+		(
+			(SELECT seqNextval('BOARD_POPUP') FROM DUAL)
+			, #{boardSeq}
+			, #{popupNm}
+			, #{popupDc}
+			, #{noticeStartDay}
+			, #{noticeEndDay}
+			, #{popupLocationLeft}
+			, #{popupLocationRight}
+			, #{popupSizeWidth}
+			, #{popupSizeHeight}
+			, #{popupKind}
+			, SYSDATE()
+		)
+		<selectKey keyProperty="boardPopupSeq" resultType="int" order="AFTER">
+			SELECT CURRVAL AS boardPopupSeq FROM UID_SEQ WHERE TABLE_NAME = 'BOARD_POPUP'
+		</selectKey>
+	</insert>
+	
+	<update id="boardPopupModification" parameterType="admBulletinBoardVO">
+		UPDATE BOARD_POPUP
+		SET
+			POPUP_NM = #{popupNm}
+			, POPUP_DC = #{popupDc}
+			, NOTICE_START_DAY = #{noticeStartDay}
+			, NOTICE_END_DAY = #{noticeEndDay}
+			, POPUP_LOCATION_LEFT = #{popupLocationLeft}
+			, POPUP_LOCATION_RIGHT = #{popupLocationRight}
+			, POPUP_SIZE_WIDTH = #{popupSizeWidth}
+			, POPUP_SIZE_HEIGHT = #{popupSizeHeight}
+			, POPUP_KIND = #{popupKind}
+		WHERE BOARD_POPUP_SEQ = #{boardPopupSeq}
+	</update>
+	
+	<delete id="boardPopupDeletion" parameterType="admBulletinBoardVO">
+		DELETE FROM BOARD_POPUP
+		WHERE BOARD_POPUP_SEQ = #{boardPopupSeq}
+	</delete>
+</mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.allblanc.adm.prd.mapper.AdmProductCategoryMapper">
+	
+	<select id="selectProductCategoryMaxSortOrdr" parameterType="admProductCategoryVO" resultType="long">
+		SELECT
+			NVL(MAX(SORT_ORDR)  + 1, 1) AS cnt
+		FROM PRODUCT_CATEGORY_INFO M
+		WHERE 1 = 1
+		<choose>
+			<when test="parentsProductCategorySeq != null and parentsProductCategorySeq > 0 ">
+				AND PARENTS_PRODUCT_CATEGORY_SEQ = #{parentsProductCategorySeq}
+			</when>
+			<otherwise>
+				AND PARENTS_PRODUCT_CATEGORY_SEQ = 0
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectProductCategoryOneDepthList" parameterType="admProductCategoryVO" resultType="admProductCategoryVO">
+		SELECT
+			PC.PRODUCT_CATEGORY_SEQ AS productCategorySeq
+			, PC.PARENTS_PRODUCT_CATEGORY_SEQ AS parentsProductCategorySeq
+			, PC.PRODUCT_CATEGORY_NM AS productCategoryNm
+			, PC.PRODUCT_CATEGORY_URL AS productCategoryUrl
+			, PC.USE_AT AS useAt
+			, PC.SORT_ORDR AS sortOrdr
+		FROM PRODUCT_CATEGORY_INFO PC
+		WHERE 1 = 1
+			AND PARENTS_PRODUCT_CATEGORY_SEQ = 0
+		ORDER BY SORT_ORDR
+	</select>
+	
+	<select id="selectProductCategoryAllDepthList" parameterType="admProductCategoryVO" resultType="admProductCategoryVO">
+		<![CDATA[ 
+		SELECT
+			PC.PRODUCT_CATEGORY_SEQ AS productCategorySeq
+			, PC.PARENTS_PRODUCT_CATEGORY_SEQ AS parentsProductCategorySeq
+			, PC.PRODUCT_CATEGORY_NM AS productCategoryNm
+			, PC.PRODUCT_CATEGORY_URL AS productCategoryUrl
+			, PC.USE_AT AS useAt
+			, PC.SORT_ORDR AS sortOrdr
+			, fnc.depth AS depth
+		FROM (
+			SELECT getProductCategoryLevel() AS seq, @level AS depth
+			FROM (
+				SELECT @start_with:=0, @seq:=@start_with, @level:=0
+			) vars
+			JOIN PRODUCT_CATEGORY_INFO
+			WHERE @seq IS NOT NULL
+		) fnc
+		JOIN PRODUCT_CATEGORY_INFO PC ON fnc.seq = PC.PRODUCT_CATEGORY_SEQ
+		ORDER BY depth, SORT_ORDR
+		]]>
+	</select>
+	
+	<select id="selectProductCategoryDetail" parameterType="admProductCategoryVO" resultType="admProductCategoryVO">
+		SELECT
+			PC.PRODUCT_CATEGORY_SEQ AS productCategorySeq
+			, PC.PARENTS_PRODUCT_CATEGORY_SEQ AS parentsProductCategorySeq
+			, PC.PRODUCT_CATEGORY_NM AS productCategoryNm
+			, PC.PRODUCT_CATEGORY_URL AS productCategoryUrl
+			, PC.USE_AT AS useAt
+			, PC.SORT_ORDR AS sortOrdr
+		FROM PRODUCT_CATEGORY_INFO PC
+		WHERE 1 = 1
+			AND PRODUCT_CATEGORY_SEQ = #{productCategorySeq}
+	</select>
+	
+	<select id="selectProductCategoryChildList" parameterType="admProductCategoryVO" resultType="admProductCategoryVO">
+		SELECT
+			PC.PRODUCT_CATEGORY_SEQ AS productCategorySeq
+			, PC.PARENTS_PRODUCT_CATEGORY_SEQ AS parentsProductCategorySeq
+			, PC.PRODUCT_CATEGORY_NM AS productCategoryNm
+			, PC.PRODUCT_CATEGORY_URL AS productCategoryUrl
+			, PC.USE_AT AS useAt
+			, PC.SORT_ORDR AS sortOrdr
+		FROM PRODUCT_CATEGORY_INFO PC
+		WHERE 1 = 1
+			AND PARENTS_PRODUCT_CATEGORY_SEQ = #{productCategorySeq}
+		ORDER BY SORT_ORDR
+	</select>
+	
+	<insert id="productCategoryRegistration" parameterType="admProductCategoryVO">
+		INSERT INTO PRODUCT_CATEGORY_INFO
+		(
+			PRODUCT_CATEGORY_SEQ
+			, PARENTS_PRODUCT_CATEGORY_SEQ
+			, PRODUCT_CATEGORY_NM
+			, PRODUCT_CATEGORY_URL
+			, USE_AT
+			, CREATE_DT
+			, CREATE_SEQ
+			, SORT_ORDR
+		)
+		VALUES
+		(
+			(SELECT seqNextval('PRODUCT_CATEGORY') FROM DUAL)
+			<choose>
+				<when test="parentsProductCategorySeq != null and parentsProductCategorySeq > 0 ">
+				, #{parentsProductCategorySeq}
+				</when>
+				<otherwise>
+				, 0
+				</otherwise>
+			</choose>
+			, #{productCategoryNm}
+			, #{productCategoryUrl}
+			, #{useAt}
+			, SYSDATE()
+			, #{createSeq}
+			, (SELECT IFNULL(MAX(SORT_ORDR), 0)+1 FROM PRODUCT_CATEGORY_INFO AS PC
+				WHERE
+				<choose>
+					<when test="parentsProductCategorySeq != null and parentsProductCategorySeq > 0 ">
+						PARENTS_PRODUCT_CATEGORY_SEQ = #{parentsProductCategorySeq}
+					</when>
+					<otherwise>
+						PARENTS_PRODUCT_CATEGORY_SEQ = 0
+					</otherwise>
+				</choose>
+			)
+		)
+	</insert>
+	
+	<update id="productCategoryModification" parameterType="admProductCategoryVO">
+		UPDATE PRODUCT_CATEGORY_INFO
+		SET
+			PRODUCT_CATEGORY_NM = #{productCategoryNm}
+			, PRODUCT_CATEGORY_URL = #{productCategoryUrl}
+			<choose>
+				<when test="parentsProductCategorySeq != null and parentsProductCategorySeq > 0 ">
+				, PARENTS_PRODUCT_CATEGORY_SEQ = #{parentsProductCategorySeq}
+				</when>
+				<otherwise>
+				, PARENTS_PRODUCT_CATEGORY_SEQ = 0
+				</otherwise>
+			</choose>
+			, USE_AT = #{useAt}
+			, SORT_ORDR = #{sortOrdr}
+		WHERE 
+			PRODUCT_CATEGORY_SEQ = #{productCategorySeq}
+	</update>
+	
+	<delete id="productCategoryDeletion" parameterType="admProductCategoryVO">
+		DELETE FROM PRODUCT_CATEGORY_INFO
+		WHERE PRODUCT_CATEGORY_SEQ = #{productCategorySeq}
+	</delete>
+	
+	<update id="productCategoryOrdrUpdate" parameterType="admProductCategoryVO">
+		UPDATE PRODUCT_CATEGORY_INFO
+		SET
+			SORT_ORDR = #{sortOrdr}
+		WHERE PRODUCT_CATEGORY_SEQ = #{productCategorySeq}
+	</update>
+	
+	<select id="productCategoryPreDetail" parameterType="admProductCategoryVO" resultType="admProductCategoryVO">
+		SELECT 
+			PC.PRODUCT_CATEGORY_SEQ AS productCategorySeq
+			, PC.SORT_ORDR AS sortOrdr
+		FROM PRODUCT_CATEGORY_INFO PC
+		WHERE PC.PRODUCT_CATEGORY_SEQ <![CDATA[ <> ]]> #{productCategorySeq}
+			AND PC.USE_AT = 'Y'
+			AND PC.SORT_ORDR <![CDATA[ > ]]> #{sortOrdr}
+		ORDER BY SORT_ORDR ASC, CREATE_DT DESC
+		LIMIT 1
+	</select>
+	
+	<select id="productCategoryNextDetail" parameterType="admProductCategoryVO" resultType="admProductCategoryVO">
+		SELECT 
+			PC.PRODUCT_CATEGORY_SEQ AS productCategorySeq
+			, PC.SORT_ORDR AS sortOrdr
+		FROM PRODUCT_CATEGORY_INFO PC
+		WHERE PC.PRODUCT_CATEGORY_SEQ <![CDATA[ <> ]]> #{productCategorySeq}
+			AND PC.USE_AT = 'Y'
+			AND PC.SORT_ORDR <![CDATA[ < ]]> #{sortOrdr}
+		ORDER BY SORT_ORDR DESC, CREATE_DT DESC
+		LIMIT 1
+	</select>
+</mapper>
